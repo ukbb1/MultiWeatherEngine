@@ -54,6 +54,8 @@ public class StormRenderer : MonoBehaviour
 		public float maxLife;
 		public float seed;
 		public int kind;
+		public Double2 wind;   
+		public float windT;
 	}
 
 	private struct Drop
@@ -106,6 +108,9 @@ public class StormRenderer : MonoBehaviour
 	
 	
 	private bool puffLive = true;
+	
+	
+	private bool puffFreeze = true;
 	
 	
 	public float spawnAnimT = 1f;
@@ -704,14 +709,18 @@ public class StormRenderer : MonoBehaviour
 		camLocal = WorldView.ToLocalPosition(camG);
 		
 		
+		
 		try
 		{
 			s.ToStormFrame(camG, out var psLive, out var phLive);
-			puffLive = Math.Abs(psLive) < s.Rmax * 6.0 && phLive < s.Htop * 1.4;
+			double aps = Math.Abs(psLive);
+			puffLive = aps < s.Rmax * 6.0 && phLive < s.Htop * 1.4;
+			puffFreeze = aps > s.Rmax * 15.0 || phLive > s.Htop * 3.0;
 		}
 		catch
 		{
 			puffLive = false;
+			puffFreeze = true;
 		}
 
 		
@@ -1018,9 +1027,30 @@ public class StormRenderer : MonoBehaviour
 		for (int i = 0; i < puffs.Length; i++)
 		{
 			Puff puff = puffs[i];
-			Double2 val = s.SampleWind(puff.pos);
-			ref Double2 pos = ref puff.pos;
-			pos += val * ((puff.kind == 0) ? ((double)dt * 0.12) : ((double)dt));
+			
+			
+			
+			Double2 val;
+			if (!puffFreeze)
+			{
+				if (puff.windT <= 0f)
+				{
+					val = s.SampleWind(puff.pos);
+					puff.wind = val;
+					puff.windT = 0.1f;
+				}
+				else
+				{
+					val = puff.wind;
+				}
+				puff.windT -= dt;
+				ref Double2 pos = ref puff.pos;
+				pos += val * ((puff.kind == 0) ? ((double)dt * 0.12) : ((double)dt));
+			}
+			else
+			{
+				val = puff.wind;
+			}
 			
 			if (puffLive)
 			{
@@ -1704,7 +1734,7 @@ public class StormRenderer : MonoBehaviour
 			num7 *= farAbsS / 10000f;
 			halfW *= farAbsS / 10000f;
 		}
-		float num8 = (float)TyphoonConfig.I.rainOpacity * (float)num2 * (float)s.MergeFade();   
+		float num8 = (float)TyphoonConfig.I.rainOpacity * (float)num2 * (float)s.MergeFade() * spawnAnimT;   
 		
 		
 		

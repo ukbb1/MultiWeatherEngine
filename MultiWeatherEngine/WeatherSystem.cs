@@ -46,7 +46,7 @@ public class WeatherSystem
 	{
 		
 		
-		new TypeSpec { name = "台风",        rmaxFrac = 0.0079, htopFrac = 0.15, hbaseM = 600,  aspectMin = 0.45, vmaxMs = 62, updraft = 0.32, lifetimeSec = 0,      rotate = 1.0,  downburst = 0.0,  line = 0.0,  gustFront = 0.0,  tornadoHost = false, defaultCat = 4, desc = "热带气旋（最大天气系统），持续" },
+		new TypeSpec { name = "台风",        rmaxFrac = 0.0079, htopFrac = 0.15, hbaseM = 600,  aspectMin = 0.45, vmaxMs = 62, updraft = 0.32, lifetimeSec = 259200, rotate = 1.0,  downburst = 0.0,  line = 0.0,  gustFront = 0.0,  tornadoHost = false, defaultCat = 4, desc = "热带气旋（最大天气系统），现实 3-7 天生命周期" },
 		new TypeSpec { name = "中尺度对流系统", rmaxFrac = 0.0044, htopFrac = 0.13, hbaseM = 1200, aspectMin = 0.50, vmaxMs = 30, updraft = 0.50, lifetimeSec = 21600, rotate = 0.30, downburst = 0.30, line = 0.50, gustFront = 0.75, tornadoHost = true,  defaultCat = 4, desc = "MCS：大尺度，内含弓形飑线+多涡旋" },
 		new TypeSpec { name = "超级单体",    rmaxFrac = 0.0019,  htopFrac = 0.12, hbaseM = 1000, aspectMin = 0.50, vmaxMs = 38, updraft = 0.55, lifetimeSec = 14400, rotate = 0.85, downburst = 0.30, line = 0.0,  gustFront = 0.40, tornadoHost = true,  defaultCat = 4, desc = "超级单体：深厚中气旋，可产龙卷" },
 		new TypeSpec { name = "飑线",        rmaxFrac = 0.0031,  htopFrac = 0.12, hbaseM = 1200, aspectMin = 0.40, vmaxMs = 32, updraft = 0.50, lifetimeSec = 14400, rotate = 0.10, downburst = 0.40, line = 0.85, gustFront = 0.95, tornadoHost = true,  defaultCat = 3, desc = "飑线：线状+弓形+阵风锋，可产龙卷" },
@@ -574,7 +574,9 @@ public class WeatherSystem
 			lifetime = 0.0;
 		}
 		age = 0.0;
-		stage = 0;
+		
+		
+		stage = (lifetime > 0.0) ? 0 : 1;
 		intensity = 0.4;
 		
 		
@@ -680,8 +682,9 @@ public class WeatherSystem
 		}
 		Router = Rmax * 9.0;
 		rmaxBase = Rmax;
-		vmaxBase = Vmax;
+		
 		SetCategory(category);
+		vmaxBase = vmaxTarget;
 	}
 
 	public void Advance(double dt)
@@ -694,9 +697,12 @@ public class WeatherSystem
 		{
 			dt = 0.0;
 		}
-		if (dt > 5.0)
+		
+		
+		
+		if (dt > 30.0)
 		{
-			dt = 5.0;
+			dt = 30.0;
 		}
 		
 		
@@ -758,7 +764,9 @@ public class WeatherSystem
 		}
 		else
 		{
+			
 			intensity = 1.0;
+			stage = 1;
 		}
 		
 		driftAngle += (0.05 + 0.2 * (double)(seed % 13) / 13.0) * dt * 0.02;

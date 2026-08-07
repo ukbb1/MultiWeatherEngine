@@ -450,6 +450,9 @@ public class TyphoonManager : MonoBehaviour
 				big.Rmax = Math.Min(big.Rmax * (1.0 + 0.12 * gain), big.rmaxBase * 3.0);
 				big.Router = big.Rmax * 9.0;
 				big.Vmax = Math.Min(big.Vmax * (1.0 + 0.08 * gain), big.vmaxBase * 2.0);
+				
+				
+				big.vmaxTarget = big.Vmax;
 				big.intensity = 1.0;
 				big.stage = 1;
 				Msg(WeatherSystem.TypeName(small.type) + " 被 " + WeatherSystem.TypeName(big.type) + " 吞并（合并增强 #" + big.mergeCount + "）");
